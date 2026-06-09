@@ -12,7 +12,8 @@ source "$SCRIPT_DIR/lib/common.sh"
 MODULES=(shell dotfiles ssh tools)
 
 run_module() {
-  local name="$1" file="$SCRIPT_DIR/modules/$name.sh"
+  local name="$1"
+  local file="$SCRIPT_DIR/modules/$name.sh"
   if [ ! -f "$file" ]; then
     err "unknown module: $name (valid: ${MODULES[*]})"
     return 1

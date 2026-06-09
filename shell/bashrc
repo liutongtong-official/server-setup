@@ -8,7 +8,7 @@ _gcd() {
   local cur branches
   cur="${COMP_WORDS[COMP_CWORD]}"
   mapfile -t branches < <(git worktree list 2>/dev/null | sed -n 's/.*\[\(.*\)\]/\1/p')
-  COMPREPLY=( $(compgen -W "${branches[*]}" -- "$cur") )
+  mapfile -t COMPREPLY < <(compgen -W "${branches[*]}" -- "$cur")
 }
 complete -F _gcd gcd
 

@@ -20,7 +20,7 @@ gcd() {
   local target
   target=$(git worktree list | grep "\[$1\]" | awk '{print $1}')
   if [ -n "$target" ]; then
-    cd "$target"
+    cd "$target" || return
   else
     echo "No worktree found for branch [$1]"
   fi

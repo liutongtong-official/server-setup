@@ -23,7 +23,8 @@ err()  { printf '%s err%s %s\n' "$_C_RED"    "$_C_RESET" "$*" >&2; }
 backup_file() {
   local path="$1"
   [ -e "$path" ] || return 0
-  local backup="${path}.bak.$(date +%Y%m%d%H%M%S)"
+  local backup
+  backup="${path}.bak.$(date +%Y%m%d%H%M%S)"
   mv "$path" "$backup"
   warn "backed up existing $path -> $backup"
 }
@@ -41,31 +42,27 @@ symlink_safe() {
   ok "linked $dst -> $src"
 }
 
-# append_once FILE MARKER LINE — append LINE to FILE only if MARKER is absent.
-# MARKER is a stable tag written as a trailing comment so re-runs are no-ops.
-append_once() {
-  local file="$1" marker="$2" line="$3"
-  mkdir -p "$(dirname "$file")"
-  touch "$file"
-  if grep -qF "$marker" "$file"; then
-    ok "already configured: $file ($marker)"
-    return 0
-  fi
-  printf '\n%s # %s\n' "$line" "$marker" >>"$file"
-  ok "appended to $file ($marker)"
-}
+# append_once / prepend_once FILE MARKER LINE — write LINE to FILE, tagged with a
+# trailing MARKER comment, only if MARKER is absent (so re-runs are no-ops).
+# append adds at the end; prepend inserts at the top, for directives that must
+# precede existing content (e.g. an ssh Include).
+append_once()  { _insert_once append  "$@"; }
+prepend_once() { _insert_once prepend "$@"; }
 
-# prepend_once FILE MARKER LINE — insert LINE at the top of FILE only if MARKER
-# is absent. For directives that must precede existing content (e.g. ssh Include).
-prepend_once() {
-  local file="$1" marker="$2" line="$3"
+_insert_once() {
+  local pos="$1" file="$2" marker="$3" line="$4"
   mkdir -p "$(dirname "$file")"
   touch "$file"
   if grep -qF "$marker" "$file"; then
     ok "already configured: $file ($marker)"
     return 0
   fi
-  { printf '%s # %s\n\n' "$line" "$marker"; cat "$file"; } >"$file.tmp"
-  mv "$file.tmp" "$file"
-  ok "prepended to $file ($marker)"
+  if [ "$pos" = prepend ]; then
+    { printf '%s # %s\n\n' "$line" "$marker"; cat "$file"; } >"$file.tmp"
+    mv "$file.tmp" "$file"
+    ok "prepended to $file ($marker)"
+  else
+    printf '\n%s # %s\n' "$line" "$marker" >>"$file"
+    ok "appended to $file ($marker)"
+  fi
 }

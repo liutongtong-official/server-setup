@@ -1,4 +1,3 @@
-# shellcheck shell=bash
 # zsh-specific config. Sourced from ~/.zshrc after the shared block.
 
 source "${0:A:h}/common.sh"
