@@ -1,0 +1,16 @@
+# shellcheck shell=bash
+# bash-specific config. Sourced from ~/.bashrc after the shared block.
+
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+# gcd completion — complete branch names that have a worktree.
+_gcd() {
+  local cur branches
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  mapfile -t branches < <(git worktree list 2>/dev/null | sed -n 's/.*\[\(.*\)\]/\1/p')
+  COMPREPLY=( $(compgen -W "${branches[*]}" -- "$cur") )
+}
+complete -F _gcd gcd
+
+# nvm bash completion
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"

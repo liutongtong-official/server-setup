@@ -1,0 +1,28 @@
+# shellcheck shell=bash
+# zsh-specific config. Sourced from ~/.zshrc after the shared block.
+
+source "${0:A:h}/common.sh"
+
+# --- completion -----------------------------------------------------------
+autoload -Uz compinit && compinit
+# Case-insensitive completion (bash's `completion-ignore-case on`).
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+# gcd completion — complete branch names that have a worktree.
+_gcd() {
+  local -a branches
+  branches=(${(f)"$(git worktree list 2>/dev/null | sed -n 's/.*\[\(.*\)\]/\1/p')"})
+  compadd -- $branches
+}
+compdef _gcd gcd
+
+# --- key bindings ---------------------------------------------------------
+# zsh does not read ~/.inputrc; reproduce the prefix history-search bindings.
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search    # Up
+bindkey '^[[B' down-line-or-beginning-search  # Down
+
+# nvm completion (bash-completion script; same file nvm ships for all shells)
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
