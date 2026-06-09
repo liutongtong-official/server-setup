@@ -7,6 +7,7 @@
 claude-pull() {
   local dir
   for dir in ~/.claude/rules ~/.claude/skills; do
+    [ -d "$dir" ] || continue
     echo "==> git pull in $dir"
     git -C "$dir" pull || return $?
   done
@@ -17,6 +18,10 @@ alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset 
 
 # gcd BRANCH — cd into the worktree checked out for BRANCH.
 gcd() {
+  if [ -z "${1:-}" ]; then
+    echo "Usage: gcd <branch>"
+    return 1
+  fi
   local target
   target=$(git worktree list | grep "\[$1\]" | awk '{print $1}')
   if [ -n "$target" ]; then

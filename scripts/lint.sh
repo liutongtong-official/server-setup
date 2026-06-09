@@ -24,6 +24,11 @@ done < <(
   done
 )
 
+if [ ${#files[@]} -eq 0 ]; then
+  echo "no shell scripts found to lint"
+  exit 0
+fi
+
 printf 'shellcheck %s file(s):\n' "${#files[@]}"
 printf '  %s\n' "${files[@]}"
 shellcheck -x "${files[@]}"

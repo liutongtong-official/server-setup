@@ -44,9 +44,13 @@ install_nvm() {
     return 0
   fi
   if [ -z "$NVM_VERSION" ]; then
-    # `|| true` so a failed fetch / no-match falls through to the guard below
-    # instead of aborting via `set -e` before the diagnostic can print.
-    NVM_VERSION=$(curl -fsSL "https://api.github.com/repos/nvm-sh/nvm/releases/latest" | grep -o '"tag_name": *"[^"]*"' | head -1 | grep -o 'v[0-9.]*') || true
+    # Resolve the latest tag from the release redirect rather than the API, which
+    # is rate-limited to 60 req/h per IP (fails behind shared NATs / in CI).
+    # `|| true` so a failed fetch falls through to the guard instead of aborting
+    # via `set -e` before the diagnostic can print.
+    local latest_url
+    latest_url=$(curl -fsSL -o /dev/null -w '%{url_effective}' "https://github.com/nvm-sh/nvm/releases/latest") || true
+    NVM_VERSION="${latest_url##*/}"
     [ -n "$NVM_VERSION" ] || { err "could not resolve latest nvm version"; return 1; }
   fi
   log "installing nvm ${NVM_VERSION} -> $HOME/.nvm"

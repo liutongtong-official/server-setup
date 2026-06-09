@@ -59,7 +59,8 @@ _insert_once() {
   fi
   if [ "$pos" = prepend ]; then
     { printf '%s # %s\n\n' "$line" "$marker"; cat "$file"; } >"$file.tmp"
-    mv "$file.tmp" "$file"
+    cat "$file.tmp" >"$file"
+    rm -f "$file.tmp"
     ok "prepended to $file ($marker)"
   else
     printf '\n%s # %s\n' "$line" "$marker" >>"$file"
