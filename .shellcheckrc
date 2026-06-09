@@ -1,0 +1,4 @@
+# Sourced files are either resolved at runtime via dynamic paths (lib/common.sh)
+# or provided by the environment and absent at lint time (nvm.sh, uv env,
+# bash_completion), so "not following source" is expected noise here.
+disable=SC1091
